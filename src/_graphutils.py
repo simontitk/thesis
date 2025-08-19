@@ -95,11 +95,16 @@ class GraphUtils:
             to_aoi = trial.loc[i+1, "AOI"]
             transition_matrix[from_aoi][to_aoi] += 1
         if normalize:
-            rows_sum = np.sum(transition_matrix, axis=1)
-            transition_matrix_norm = transition_matrix / rows_sum
-            return np.nan_to_num(transition_matrix_norm, nan=0.0)
+            return GraphUtils._normalize(transition_matrix)
         
         return transition_matrix
+    
+
+    @staticmethod
+    def _normalize(transition_matrix: np.ndarray) -> np.ndarray:
+        rows_sum = np.sum(transition_matrix, axis=1)
+        transition_matrix_norm = transition_matrix / rows_sum
+        return np.nan_to_num(transition_matrix_norm, nan=0.0)
     
 
     @staticmethod
@@ -113,4 +118,3 @@ class GraphUtils:
                 if weight != 0:
                     G.add_edge(i, j, weight=weight)
         return G
-
