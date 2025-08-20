@@ -9,6 +9,7 @@ import seaborn as sns
 import networkx as nx
 from typing import Any
 from typedefs import AOICenters
+from kneed import KneeLocator
 
 
 class PlotUtils:
@@ -29,7 +30,7 @@ class PlotUtils:
         1: '#ff0000',
         2: '#f87b63',
         3: '#ebc7b4',
-        4: '#d6e6f2',
+        4: "#dcdfe1",
         5: '#7fb5e6',
         6: '#4187cc',
         7: '#1c5ca5',
@@ -96,6 +97,19 @@ class PlotUtils:
 
 
     @staticmethod
+    def elbow_plot(inertias: dict[int, float]) -> None:
+        k_values, inertia_values = zip(*inertias.items())
+        knee_locator = KneeLocator(k_values, inertia_values, curve='convex', direction='decreasing')
+        k = knee_locator.knee
+        _, ax = plt.subplots(1, 1, figsize=(6.5, 4))
+        ax.plot(k_values, inertia_values, marker='o')
+        ax.axvline(x=k, color="red")
+        ax.set(xlabel='Number of clusters [-]', ylabel='Inertia [-]', title=f'Elbow method for optimal k')
+        ax.set_xticks(k_values)
+        ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+
+    @staticmethod
     def plot_aois(aois: AOICenters, title: str = None, image: Image = None, ax: Axes = None):
         
         if not ax:
@@ -107,7 +121,7 @@ class PlotUtils:
         for aoi, (x, y) in aois.items():
             color = PlotUtils.AOI_colors.get(aoi % 10, "#696969")
             ax.scatter(x, y, s=200, edgecolors="white", color=color)
-            ax.text(x + 5, y + 5, str(aoi), fontsize=12, ha='center', va='center', color='white' )
+            ax.text(x + 1, y + 5, str(aoi), fontsize=12, ha='center', va='center', color='white' )
 
 
     @staticmethod
