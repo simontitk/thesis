@@ -5,6 +5,7 @@ import numpy as np
 import networkx as nx
 from sklearn.cluster import KMeans
 from typedefs import AOICenters
+from scipy import linalg
 
 class GraphUtils:
 
@@ -118,3 +119,42 @@ class GraphUtils:
                 if weight != 0:
                     G.add_edge(i, j, weight=weight)
         return G
+
+
+    @staticmethod
+    def transition_entropy(transition_matrix: np.ndarray) -> float:
+        M = GraphUtils._normalize(transition_matrix)
+        aois = len(M)
+        for aoi in range(aois):
+            if M[aoi].sum() == 0:
+                M[aoi] = 1 / aois 
+        pi = GraphUtils._stationary_probabilites(M)
+
+        H_transition = 0
+        for i in range(aois):
+            for j in range(aois):   
+                if M[i][j] > 0:
+                    H_transition += -1 * pi[i] * M[i][j] * np.log2(M[i][j])
+        return H_transition
+
+    
+    @staticmethod
+    def stationairy_entropy(transition_matrix: np.ndarray) -> float:
+        M = GraphUtils._normalize(transition_matrix)
+        aois = len(M)
+        for aoi in range(aois):
+            if M[aoi].sum() == 0:
+                M[aoi] = 1 / aois 
+        pi = GraphUtils._stationary_probabilites(M)
+        print(pi)
+        H_stationary = -np.sum([p*np.log2(p) for p in pi if p > 0])
+        return H_stationary
+    
+    
+    @staticmethod
+    def _stationary_probabilites(transition_matrix: np.ndarray) -> float:
+        eigen_vals, eigen_vecs = linalg.eig(transition_matrix.T)  
+        idx = np.argmin(np.abs(eigen_vals - 1))
+        pi = np.real(eigen_vecs[:, idx])
+        pi /= pi.sum()  
+        return pi
