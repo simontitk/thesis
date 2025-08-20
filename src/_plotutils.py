@@ -10,6 +10,7 @@ import networkx as nx
 from typing import Any
 from typedefs import AOICenters
 from kneed import KneeLocator
+from matplotlib import patches
 
 
 class PlotUtils:
@@ -122,6 +123,29 @@ class PlotUtils:
             color = PlotUtils.AOI_colors.get(aoi % 10, "#696969")
             ax.scatter(x, y, s=200, edgecolors="white", color=color)
             ax.text(x + 1, y + 5, str(aoi), fontsize=12, ha='center', va='center', color='white' )
+
+    
+    @staticmethod 
+    def divide_aoi_plot(image: Image, ax: Axes = None):
+        if not ax:
+            _, ax = plt.subplots(1, 1)
+
+        width, height = image.size
+        rects = [
+            (0, 0, width/2, height/2),       
+            (width/2, 0, width/2, height/2),
+            (0, height/2, width/2, height/2),
+            (width/2, height/2, width/2, height/2)
+        ]
+
+        ax.imshow(image)
+        for i, (x, y, w, h) in enumerate(rects):
+            rect = patches.Rectangle(
+                (x, y), w, h,
+                linewidth=2, edgecolor='none',
+                facecolor=PlotUtils.AOI_colors[i], alpha=0.3
+            )
+            ax.add_patch(rect)
 
 
     @staticmethod
