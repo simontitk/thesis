@@ -205,3 +205,31 @@ class PlotUtils:
         ax.set_xticks(aois, [f'AOI {i}' for i in aois])
         ax.set_ylabel(f"{title}")
         ax.set_title(f'{title} means for each AOI across subjects')
+
+
+    @staticmethod
+    def dimensionality_reduction_plot(reduced_data: np.ndarray, labels: dict[int, int], title: str = None, annotate: bool = False, ax: Axes = None):
+        if not ax:
+            _, ax = plt.subplots(1, 1)
+        if title:
+            ax.set(title=title)
+
+        scatter = ax.scatter(
+            reduced_data[:, 0], reduced_data[:, 1],
+            c=[PlotUtils.answer_colors[x] for x in labels.values()],              
+            s=250,                 
+            edgecolor='k'
+        )
+        if annotate:
+            for i, label in enumerate(labels.keys()):
+                ax.text(
+                    reduced_data[i,0], reduced_data[i,1], str(label),
+                    color='black', fontsize=9,
+                    ha='center', va='center'
+                )
+            
+        box = ax.get_position()  
+        ax.set_position([box.x0, box.y0, box.width*0.85, box.height])  
+
+        patches_list = [patches.Patch(color=color, label=str(label)) for label, color in PlotUtils.answer_colors.items()]
+        ax.legend(handles=patches_list, title="Answer", loc='center left', bbox_to_anchor=(1, 0.5))
