@@ -28,13 +28,13 @@ class PlotUtils:
     }
 
     answer_colors = {
-        1: '#ff0000',
-        2: '#f87b63',
+        1: "#b40000",
+        2: "#f16145",
         3: '#ebc7b4',
-        4: "#dcdfe1",
+        4: "#eaeef1",
         5: '#7fb5e6',
-        6: '#4187cc',
-        7: '#1c5ca5',
+        6: "#2f73b7",
+        7: "#11427a",
     }
 
     @staticmethod
@@ -151,7 +151,7 @@ class PlotUtils:
     @staticmethod
     def heatmap(transition_matrix: np.ndarray, title: str = None, ax: Axes = None):
         if not ax:
-            fig, ax = plt.subplots(1, 1, figsize=(12, 10))
+            _, ax = plt.subplots(1, 1, figsize=(12, 10))
         if title:
             ax.set(title=title)
         sns.heatmap(transition_matrix, fmt='.1f', cmap='coolwarm', annot=True, ax=ax)
@@ -214,22 +214,47 @@ class PlotUtils:
         if title:
             ax.set(title=title)
 
-        scatter = ax.scatter(
-            reduced_data[:, 0], reduced_data[:, 1],
-            c=[PlotUtils.answer_colors[x] for x in labels.values()],              
-            s=250,                 
-            edgecolor='k'
-        )
-        if annotate:
-            for i, label in enumerate(labels.keys()):
-                ax.text(
-                    reduced_data[i,0], reduced_data[i,1], str(label),
-                    color='black', fontsize=9,
-                    ha='center', va='center'
-                )
+        _, dimens = reduced_data.shape
+
+        if dimens == 3:
+            if (not hasattr(ax, "zaxis")):
+                ax_pos = ax.get_position()
+                fig = ax.figure
+                ax.remove()
+                ax = fig.add_axes(ax_pos, projection='3d')
+
+            ax.scatter(
+                reduced_data[:, 0], reduced_data[:, 1], reduced_data[:, 2],
+                c=[PlotUtils.answer_colors[x] for x in labels.values()],              
+                s=250,                 
+                edgecolor='k'
+            )
+        
+            if annotate:
+                for i, label in enumerate(labels.keys()):
+                    ax.text(
+                        reduced_data[i,0], reduced_data[i,1], reduced_data[i, 2], str(label),
+                        color='black', fontsize=9,
+                        ha='center', va='center'
+                    )
             
+        else:
+            ax.scatter(
+                reduced_data[:, 0], reduced_data[:, 1],
+                c=[PlotUtils.answer_colors[x] for x in labels.values()],              
+                s=250,                 
+                edgecolor='k'
+            )
+            
+            if annotate:
+                for i, label in enumerate(labels.keys()):
+                    ax.text(
+                        reduced_data[i,0], reduced_data[i,1], str(label),
+                        color='black', fontsize=9,
+                        ha='center', va='center'
+                )
+                    
         box = ax.get_position()  
         ax.set_position([box.x0, box.y0, box.width*0.85, box.height])  
-
         patches_list = [patches.Patch(color=color, label=str(label)) for label, color in PlotUtils.answer_colors.items()]
         ax.legend(handles=patches_list, title="Answer", loc='center left', bbox_to_anchor=(1, 0.5))
