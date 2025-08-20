@@ -141,5 +141,11 @@ class DataLoader:
         return self.image_aois[image]
     
 
-    
-
+    def get_image_ratings(self, image: str) -> dict[int, int]:
+        image_dict = self.get_image_dict(image)
+        ratings: dict[int, int] = {}
+        for (subject, trial) in image_dict.items():
+            answers = self.get_subject_answers(subject)
+            response = answers[answers["trial"] == trial]["response"].item()
+            ratings[subject] = int(response)
+        return ratings
