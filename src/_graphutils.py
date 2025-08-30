@@ -11,7 +11,10 @@ from sklearn.model_selection import LeaveOneOut
 from typedefs import AOICenters
 from scipy import linalg
 import warnings
+
+
 warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 class GraphUtils:
 
@@ -201,7 +204,6 @@ class GraphUtils:
             "qwk": [],
             "accuracy": []
         }
-        alphas = np.arange(0, 1.01, 0.01)
         for alpha in alphas:
             loocv = LeaveOneOut()
             y_true, y_pred = [], []
@@ -234,3 +236,12 @@ class GraphUtils:
             results[k] = np.array(v)
 
         return results
+
+
+    @staticmethod
+    def kernel_entropy(K_matrix: np.ndarray) -> float:
+        H_max = np.log2(len(K_matrix))
+        K_norm = GraphUtils._normalize(K_matrix)
+        H_row = -np.sum(K_norm * np.log(K_norm) / np.log(2), axis=1)
+        H_mean = np.mean(H_row)
+        return float(H_mean / H_max)

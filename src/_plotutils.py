@@ -265,7 +265,7 @@ class PlotUtils:
 
 
     @staticmethod
-    def plot(x: np.ndarray, y: np.ndarray, title: str = None, xlabel: str = None, ylabel: str = None, ax: Axes = None):
+    def plot(x: np.ndarray, y: np.ndarray, title: str = None, xlabel: str = None, ylabel: str = None, ax: Axes = None, label: str = None):
         if not ax:
             _, ax = plt.subplots(1, 1)
         if title:
@@ -274,15 +274,19 @@ class PlotUtils:
             ax.set(xlabel=xlabel)
         if ylabel:
             ax.set(ylabel=ylabel)
+        if label:
+            ax.legend()
 
-        ax.plot(x, y)
+        ax.plot(x, y, label=label)
     
 
     @staticmethod
-    def loocv_plot(results: dict[str, np.ndarray], image: str):
-        fig, axs = PlotUtils.wrap_subplots(4, 2)
-        fig.suptitle(image)
-        PlotUtils.plot(results["alphas"], results["mae"], ax=axs[0], xlabel="alpha [-]", ylabel="MAE [-]")
-        PlotUtils.plot(results["alphas"], results["rmse"], ax=axs[1], xlabel="alpha [-]", ylabel="RMSE [-]")
-        PlotUtils.plot(results["alphas"], results["accuracy"], ax=axs[2], xlabel="alpha [-]", ylabel="Accuracy [-]")
-        PlotUtils.plot(results["alphas"], results["qwk"], ax=axs[3], xlabel="alpha [-]", ylabel="QWK [-]")
+    def loocv_plot(results: dict[str, np.ndarray], title: str = None):
+        fig, axs = PlotUtils.wrap_subplots(2, 2)
+        if title:
+            fig.suptitle(title)
+        axs[0].plot(results["alphas"], results["rmse"], label="RMSE")
+        axs[0].plot(results["alphas"], results["mae"], label="MAE")
+        axs[0].legend()
+        axs[0].set(xlabel="alpha [-]", ylabel="MAE & RMSE [-]", title="Mean absolute & root mean square error")
+        PlotUtils.plot(results["alphas"], results["qwk"], ax=axs[1], xlabel="alpha [-]", ylabel="QWK [-]", title='Quadratic weighted kappa')
