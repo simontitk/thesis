@@ -104,7 +104,7 @@ class GraphUtils:
     @staticmethod
     def _normalize(transition_matrix: np.ndarray) -> np.ndarray:
         rows_sum = np.sum(transition_matrix, axis=1)
-        transition_matrix_norm = transition_matrix / rows_sum
+        transition_matrix_norm = transition_matrix / rows_sum[:, np.newaxis]
         return np.nan_to_num(transition_matrix_norm, nan=0.0)
     
 
@@ -119,35 +119,57 @@ class GraphUtils:
                 if weight != 0:
                     G.add_edge(i, j, weight=weight)
         return G
-
+    
 
     @staticmethod
-    def transition_entropy(transition_matrix: np.ndarray) -> float:
+    def graph_to_transition_matrix(G: nx.Graph, normalize: bool = False) -> np.ndarray:
+        nodes = G.nodes
+        transition_matrix = np.zeros(shape=(len(nodes), len(nodes)))
+        for i, u in enumerate(nodes):
+            neighbors = list(G[u])
+            if neighbors:
+                weights = np.array([G[u][v].get('weight', 1.0) for v in neighbors])
+                for j, v in enumerate(neighbors):
+                    transition_matrix[i, v] = weights[j]
+                    
+        if normalize:
+            return GraphUtils._normalize(transition_matrix)
+
+        return transition_matrix
+    
+
+    @staticmethod
+    def transition_entropy(transition_matrix: np.ndarray, normalize: bool = True) -> float:
         M = GraphUtils._normalize(transition_matrix)
         aois = len(M)
         for aoi in range(aois):
             if M[aoi].sum() == 0:
                 M[aoi] = 1 / aois 
         pi = GraphUtils._stationary_probabilites(M)
+
+        print(M)
 
         H_transition = 0
         for i in range(aois):
             for j in range(aois):   
                 if M[i][j] > 0:
                     H_transition += -1 * pi[i] * M[i][j] * np.log2(M[i][j])
+        if normalize:
+            return H_transition / np.log2(aois)
         return H_transition
 
     
     @staticmethod
-    def stationairy_entropy(transition_matrix: np.ndarray) -> float:
+    def stationairy_entropy(transition_matrix: np.ndarray, normalize: bool = True) -> float:
         M = GraphUtils._normalize(transition_matrix)
         aois = len(M)
         for aoi in range(aois):
             if M[aoi].sum() == 0:
                 M[aoi] = 1 / aois 
         pi = GraphUtils._stationary_probabilites(M)
-        print(pi)
         H_stationary = -np.sum([p*np.log2(p) for p in pi if p > 0])
+        if normalize:
+            return H_stationary / np.log2(aois)
         return H_stationary
     
     

@@ -125,6 +125,14 @@ class DataLoader:
         ]
 
 
+    def get_example_images(self) -> list[str]:
+        return [
+            "2017_28690375.jpg", 
+            "2017_44808194.jpg", 
+            "2017_98830509.jpg"
+        ]
+
+
     def get_image_dict(self, image: str) -> dict[int, int | str]:
         return self.image_map[image]
 
@@ -144,6 +152,19 @@ class DataLoader:
     
     def get_image_aois(self, image: str) -> AOICenters:
         return self.image_aois[image]
+    
+
+    def divide_image_aois(self, image: str = None) -> AOICenters:
+        width, height = self.image_width, self.image_height
+        if image:
+            width, height = self.get_image(image).size
+        
+        return {
+            0: (width // 4, height // 4),
+            1: (3 * width // 4, height // 4),
+            2: (width // 4, 3 * height // 4),
+            3: (3 * width // 4, 3* height // 4),
+        }
     
 
     def get_image_ratings(self, image: str) -> dict[int, int]:

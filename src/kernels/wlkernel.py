@@ -78,5 +78,5 @@ class WLKernel:
             kernel_value += labels_dot_product
 
         if normalize:
-            return kernel_value / len(feature_vectors)
+            return kernel_value / len(feature_vector1)
         return kernel_value

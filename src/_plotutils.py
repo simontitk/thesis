@@ -98,14 +98,18 @@ class PlotUtils:
 
 
     @staticmethod
-    def elbow_plot(inertias: dict[int, float]) -> None:
+    def elbow_plot(inertias: dict[int, float], title: str =None, ax: Axes=None) -> None:
+        if not ax:
+            _, ax = plt.subplots(1, 1, figsize=(6.5, 4))
+        if title:
+            ax.set(title=title)
+
         k_values, inertia_values = zip(*inertias.items())
         knee_locator = KneeLocator(k_values, inertia_values, curve='convex', direction='decreasing')
         k = knee_locator.knee
-        _, ax = plt.subplots(1, 1, figsize=(6.5, 4))
         ax.plot(k_values, inertia_values, marker='o')
         ax.axvline(x=k, color="red")
-        ax.set(xlabel='Number of clusters [-]', ylabel='Inertia [-]', title=f'Elbow method for optimal k')
+        ax.set(xlabel='Number of clusters [-]', ylabel='Inertia [-]')
         ax.set_xticks(k_values)
         ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
@@ -149,9 +153,9 @@ class PlotUtils:
 
 
     @staticmethod
-    def heatmap(transition_matrix: np.ndarray, title: str = None, ax: Axes = None):
+    def heatmap(transition_matrix: np.ndarray, title: str = None, figsize: tuple[int, int]=None, ax: Axes = None):
         if not ax:
-            _, ax = plt.subplots(1, 1, figsize=(12, 10))
+            _, ax = plt.subplots(1, 1, figsize=(figsize or (12, 10)))
         if title:
             ax.set(title=title)
         sns.heatmap(transition_matrix, fmt='.1f', cmap='coolwarm', annot=True, ax=ax)
