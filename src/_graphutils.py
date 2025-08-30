@@ -1,11 +1,17 @@
 from kneed import KneeLocator
+from matplotlib import pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
 import networkx as nx
 from sklearn.cluster import KMeans
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.metrics import cohen_kappa_score, mean_absolute_error, root_mean_squared_error
+from sklearn.model_selection import LeaveOneOut
 from typedefs import AOICenters
 from scipy import linalg
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")
 
 class GraphUtils:
 
@@ -180,3 +186,51 @@ class GraphUtils:
         pi = np.real(eigen_vecs[:, idx])
         pi /= pi.sum()  
         return pi
+
+
+    @staticmethod
+    def loocv(K_matrix: np.ndarray, answers: dict[int, int] ):
+
+        labels = np.array(list(answers.values()))
+        alphas = np.arange(0, 1.01, 0.01)
+
+        results: dict[str, list[float]] = {
+            "alphas": alphas,
+            "mae": [],
+            "rmse": [],
+            "qwk": [],
+            "accuracy": []
+        }
+        alphas = np.arange(0, 1.01, 0.01)
+        for alpha in alphas:
+            loocv = LeaveOneOut()
+            y_true, y_pred = [], []
+
+            for train_index, test_index in loocv.split(K_matrix):
+                K_train = K_matrix[np.ix_(train_index, train_index)]
+                K_test = K_matrix[np.ix_(test_index, train_index)]
+                model = KernelRidge(alpha=alpha, kernel="precomputed")
+                model.fit(K_train, labels[train_index])
+                            
+                y_hat = model.predict(K_test)
+                y_true.append(float(labels[test_index][0]))
+                y_pred.append(float(y_hat[0]))
+                
+
+            y_pred_rounded = np.clip(np.rint(y_pred), 1, 7)
+            y_pred_matched_y_true = np.array(y_pred_rounded) == np.array(y_true)
+           
+            mae = mean_absolute_error(y_true, y_pred)
+            rmse = root_mean_squared_error(y_true, y_pred)
+            accuracy = np.mean(y_pred_matched_y_true).item()
+            qwk = cohen_kappa_score(y_true, y_pred_rounded, weights='quadratic')  
+
+            results["mae"].append(mae)
+            results["rmse"].append(rmse)
+            results["qwk"].append(qwk)
+            results["accuracy"].append(accuracy)
+
+        for (k, v) in results.items():
+            results[k] = np.array(v)
+
+        return results
