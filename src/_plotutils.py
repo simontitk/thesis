@@ -262,3 +262,27 @@ class PlotUtils:
         ax.set_position([box.x0, box.y0, box.width*0.85, box.height])  
         patches_list = [patches.Patch(color=color, label=str(label)) for label, color in PlotUtils.answer_colors.items()]
         ax.legend(handles=patches_list, title="Answer", loc='center left', bbox_to_anchor=(1, 0.5))
+
+
+    @staticmethod
+    def plot(x: np.ndarray, y: np.ndarray, title: str = None, xlabel: str = None, ylabel: str = None, ax: Axes = None):
+        if not ax:
+            _, ax = plt.subplots(1, 1)
+        if title:
+            ax.set(title=title)
+        if xlabel:
+            ax.set(xlabel=xlabel)
+        if ylabel:
+            ax.set(ylabel=ylabel)
+
+        ax.plot(x, y)
+    
+
+    @staticmethod
+    def loocv_plot(results: dict[str, np.ndarray], image: str):
+        fig, axs = PlotUtils.wrap_subplots(4, 2)
+        fig.suptitle(image)
+        PlotUtils.plot(results["alphas"], results["mae"], ax=axs[0], xlabel="alpha [-]", ylabel="MAE [-]")
+        PlotUtils.plot(results["alphas"], results["rmse"], ax=axs[1], xlabel="alpha [-]", ylabel="RMSE [-]")
+        PlotUtils.plot(results["alphas"], results["accuracy"], ax=axs[2], xlabel="alpha [-]", ylabel="Accuracy [-]")
+        PlotUtils.plot(results["alphas"], results["qwk"], ax=axs[3], xlabel="alpha [-]", ylabel="QWK [-]")
