@@ -50,8 +50,9 @@ class WLKernel:
         feature_vector = [Counter(labels.values())]
         for _ in range(refinement_steps):
             new_labels = self.refine(G, labels)
-            labels = new_labels
-            feature_vector.append(Counter(new_labels.values()))
+            if len(set(labels.values())) != len(set(new_labels.values())):
+                labels = new_labels
+            feature_vector.append(Counter(labels.values()))
         return feature_vector
 
 
