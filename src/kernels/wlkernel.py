@@ -17,9 +17,12 @@ class WLKernel:
         """Single relabeling step that collects each node's neighbor labels and hashes this multiset into a new one."""
         new_labels = {}
         for node in G.nodes:
-            neighbor_labels = tuple(
-                sorted([labels[neighbor] for neighbor in G.neighbors(node)])
-            )
+            neighbor_labels = tuple(sorted([labels[neighbor] for neighbor in G.neighbors(node)]))
+
+            in_neighbors = [labels[n] for n in G.predecessors(node)]
+            out_neighbors = [labels[n] for n in G.successors(node)]
+            neighbor_labels = (*tuple(sorted(in_neighbors)), *tuple(sorted(out_neighbors)))
+
             new_labels[node] = self.hasher.hash((labels[node], neighbor_labels))
 
         return new_labels
