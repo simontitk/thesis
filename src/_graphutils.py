@@ -156,8 +156,6 @@ class GraphUtils:
                 M[aoi] = 1 / aois 
         pi = GraphUtils._stationary_probabilites(M)
 
-        print(M)
-
         H_transition = 0
         for i in range(aois):
             for j in range(aois):   
